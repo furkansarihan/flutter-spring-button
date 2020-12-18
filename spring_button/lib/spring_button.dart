@@ -29,74 +29,116 @@ class SpringButton extends StatefulWidget {
   ///Use this value to determine the scaling factor while the animation is being played. Choose a value between 0.0 and 1.0.
   final double scaleCoefficient;
 
+  final Duration springDownDuration;
+
+  final Duration springUpDuration;
+
+  final Curve springCurve;
+
+  final bool releaseOnLongPress;
+
   ///Delegate for gesture callback.
   final GestureTapDownCallback onTapDown;
+
   ///Delegate for gesture callback.
   final GestureTapUpCallback onTapUp;
+
   ///Delegate for gesture callback.
   final GestureTapCallback onTap;
+
   ///Delegate for gesture callback.
   final GestureTapCancelCallback onTapCancel;
+
   ///Delegate for gesture callback.
   final GestureTapDownCallback onSecondaryTapDown;
+
   ///Delegate for gesture callback.
   final GestureTapUpCallback onSecondaryTapUp;
+
   ///Delegate for gesture callback.
   final GestureTapCancelCallback onSecondaryTapCancel;
+
   ///Delegate for gesture callback.
   final GestureTapCallback onDoubleTap;
+
   ///Delegate for gesture callback.
   final GestureLongPressCallback onLongPress;
+
   ///Delegate for gesture callback.
   final GestureLongPressStartCallback onLongPressStart;
+
   ///Delegate for gesture callback.
   final GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
+
   ///Delegate for gesture callback.
   final GestureLongPressUpCallback onLongPressUp;
+
   ///Delegate for gesture callback.
   final GestureLongPressEndCallback onLongPressEnd;
+
   ///Delegate for gesture callback.
   final GestureDragDownCallback onVerticalDragDown;
+
   ///Delegate for gesture callback.
   final GestureDragStartCallback onVerticalDragStart;
+
   ///Delegate for gesture callback.
   final GestureDragUpdateCallback onVerticalDragUpdate;
+
   ///Delegate for gesture callback.
   final GestureDragEndCallback onVerticalDragEnd;
+
   ///Delegate for gesture callback.
   final GestureDragCancelCallback onVerticalDragCancel;
+
   ///Delegate for gesture callback.
   final GestureDragDownCallback onHorizontalDragDown;
+
   ///Delegate for gesture callback.
   final GestureDragStartCallback onHorizontalDragStart;
+
   ///Delegate for gesture callback.
   final GestureDragUpdateCallback onHorizontalDragUpdate;
+
   ///Delegate for gesture callback.
   final GestureDragEndCallback onHorizontalDragEnd;
+
   ///Delegate for gesture callback.
   final GestureDragCancelCallback onHorizontalDragCancel;
+
   ///Delegate for gesture callback.
   final GestureDragDownCallback onPanDown;
+
   ///Delegate for gesture callback.
   final GestureDragStartCallback onPanStart;
+
   ///Delegate for gesture callback.
   final GestureDragUpdateCallback onPanUpdate;
+
   ///Delegate for gesture callback.
   final GestureDragEndCallback onPanEnd;
+
   ///Delegate for gesture callback.
   final GestureDragCancelCallback onPanCancel;
+
   ///Delegate for gesture callback.
   final GestureScaleStartCallback onScaleStart;
+
   ///Delegate for gesture callback.
   final GestureScaleUpdateCallback onScaleUpdate;
+
   ///Delegate for gesture callback.
   final GestureScaleEndCallback onScaleEnd;
+
   ///Delegate for gesture callback.
   final GestureForcePressStartCallback onForcePressStart;
+
   ///Delegate for gesture callback.
   final GestureForcePressPeakCallback onForcePressPeak;
+
   ///Delegate for gesture callback.
   final GestureForcePressUpdateCallback onForcePressUpdate;
+
   ///Delegate for gesture callback.
   final GestureForcePressEndCallback onForcePressEnd;
 
@@ -107,6 +149,10 @@ class SpringButton extends StatefulWidget {
     this.useCache: true,
     this.alignment: Alignment.center,
     this.scaleCoefficient: 0.75,
+    this.springDownDuration,
+    this.springUpDuration,
+    this.springCurve,
+    this.releaseOnLongPress,
     this.onTapDown,
     this.onTapUp,
     this.onTap,
@@ -154,7 +200,8 @@ class SpringButton extends StatefulWidget {
       );
 }
 
-class SpringButtonState extends State<SpringButton> with SingleTickerProviderStateMixin {
+class SpringButtonState extends State<SpringButton>
+    with SingleTickerProviderStateMixin {
   final SpringButtonType springButtonType;
   Widget uiChild;
   final bool useCache;
@@ -189,7 +236,6 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
       vsync: this,
       lowerBound: 0.0,
       upperBound: 1.0,
-      duration: const Duration(milliseconds: 1000),
     );
     animationController.value = 1;
     animation = Tween(
@@ -198,7 +244,7 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
     ).animate(
       CurvedAnimation(
         parent: animationController,
-        curve: Curves.elasticOut,
+        curve: widget.springCurve ?? Curves.easeInOut,
       ),
     );
   }
@@ -211,19 +257,62 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
   }
 
   bool get hasMultiple {
-    List<bool> list = [hasTap, hasSecondaryTap, hasDoubleTap, hasLongPress, hasVerticalDrag, hasHorizontalDrag, hasForcePress, hasPan, hasScale];
+    List<bool> list = [
+      hasTap,
+      hasSecondaryTap,
+      hasDoubleTap,
+      hasLongPress,
+      hasVerticalDrag,
+      hasHorizontalDrag,
+      hasForcePress,
+      hasPan,
+      hasScale
+    ];
     return list.where((bool b) => b).length > 1;
   }
 
-  bool get hasTap => widget.onTapDown != null || widget.onTapUp != null || widget.onTap != null || widget.onTapCancel != null;
-  bool get hasSecondaryTap => widget.onSecondaryTapDown != null || widget.onSecondaryTapUp != null || widget.onSecondaryTapCancel != null;
+  bool get hasTap =>
+      widget.onTapDown != null ||
+      widget.onTapUp != null ||
+      widget.onTap != null ||
+      widget.onTapCancel != null;
+  bool get hasSecondaryTap =>
+      widget.onSecondaryTapDown != null ||
+      widget.onSecondaryTapUp != null ||
+      widget.onSecondaryTapCancel != null;
   bool get hasDoubleTap => widget.onDoubleTap != null;
-  bool get hasLongPress => widget.onLongPress != null || widget.onLongPressStart != null || widget.onLongPressMoveUpdate != null || widget.onLongPressUp != null || widget.onLongPressEnd != null;
-  bool get hasVerticalDrag => widget.onVerticalDragDown != null || widget.onVerticalDragStart != null || widget.onVerticalDragUpdate != null || widget.onVerticalDragEnd != null || widget.onVerticalDragCancel != null;
-  bool get hasHorizontalDrag => widget.onHorizontalDragDown != null || widget.onHorizontalDragStart != null || widget.onHorizontalDragUpdate != null || widget.onHorizontalDragEnd != null || widget.onHorizontalDragCancel != null;
-  bool get hasForcePress => widget.onForcePressStart != null || widget.onForcePressPeak != null || widget.onForcePressUpdate != null || widget.onForcePressEnd != null;
-  bool get hasPan => widget.onPanDown != null || widget.onPanStart != null || widget.onPanUpdate != null || widget.onPanCancel != null;
-  bool get hasScale => widget.onScaleStart != null || widget.onScaleUpdate != null || widget.onScaleEnd != null;
+  bool get hasLongPress =>
+      widget.onLongPress != null ||
+      widget.onLongPressStart != null ||
+      widget.onLongPressMoveUpdate != null ||
+      widget.onLongPressUp != null ||
+      widget.onLongPressEnd != null;
+  bool get hasVerticalDrag =>
+      widget.onVerticalDragDown != null ||
+      widget.onVerticalDragStart != null ||
+      widget.onVerticalDragUpdate != null ||
+      widget.onVerticalDragEnd != null ||
+      widget.onVerticalDragCancel != null;
+  bool get hasHorizontalDrag =>
+      widget.onHorizontalDragDown != null ||
+      widget.onHorizontalDragStart != null ||
+      widget.onHorizontalDragUpdate != null ||
+      widget.onHorizontalDragEnd != null ||
+      widget.onHorizontalDragCancel != null;
+  bool get hasForcePress =>
+      widget.onForcePressStart != null ||
+      widget.onForcePressPeak != null ||
+      widget.onForcePressUpdate != null ||
+      widget.onForcePressEnd != null;
+  bool get hasPan =>
+      widget.onPanDown != null ||
+      widget.onPanStart != null ||
+      widget.onPanUpdate != null ||
+      widget.onPanCancel != null;
+  bool get hasScale =>
+      widget.onScaleStart != null ||
+      widget.onScaleUpdate != null ||
+      widget.onScaleEnd != null;
 
   void enable() {
     if (!isEnabled) {
@@ -247,7 +336,8 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
     if (_debugLevel > 0) print("springDown");
 
     isSpringDown = true;
-    animationController.value = 0;
+    animationController.duration = widget.springDownDuration ?? Duration();
+    animationController.reverse();
   }
 
   Future spring() async {
@@ -261,6 +351,7 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
 
     if (_debugLevel > 0) print("spring-2");
 
+    animationController.duration = widget.springUpDuration ?? Duration();
     if (!isSpringDown) animationController.forward();
   }
 
@@ -308,19 +399,22 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
           ? null
           : (_) {
               springDown();
-              if (widget.onSecondaryTapDown != null && isEnabled) widget.onSecondaryTapDown(_);
+              if (widget.onSecondaryTapDown != null && isEnabled)
+                widget.onSecondaryTapDown(_);
             },
       onSecondaryTapUp: !hasSecondaryTap
           ? null
           : (_) {
               spring();
-              if (widget.onSecondaryTapUp != null && isEnabled) widget.onSecondaryTapUp(_);
+              if (widget.onSecondaryTapUp != null && isEnabled)
+                widget.onSecondaryTapUp(_);
             },
       onSecondaryTapCancel: !hasSecondaryTap
           ? null
           : () {
               springUp();
-              if (widget.onSecondaryTapCancel != null && isEnabled) widget.onSecondaryTapCancel();
+              if (widget.onSecondaryTapCancel != null && isEnabled)
+                widget.onSecondaryTapCancel();
             },
       onDoubleTap: !hasDoubleTap
           ? null
@@ -338,101 +432,123 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
           ? null
           : (_) {
               springDown();
-              if (widget.onLongPressStart != null && isEnabled) widget.onLongPressStart(_);
+              if (widget.onLongPressStart != null && isEnabled)
+                widget.onLongPressStart(_);
+              if (widget.releaseOnLongPress) {
+                print('releaseonLongPress');
+                spring();
+              }
             },
       onLongPressMoveUpdate: !hasLongPress
           ? null
           : (_) {
-              if (widget.onLongPressMoveUpdate != null && isEnabled) widget.onLongPressMoveUpdate(_);
+              if (widget.onLongPressMoveUpdate != null && isEnabled)
+                widget.onLongPressMoveUpdate(_);
             },
       onLongPressUp: !hasLongPress
           ? null
           : () {
               spring();
-              if (widget.onLongPressUp != null && isEnabled) widget.onLongPressUp();
+              if (widget.onLongPressUp != null && isEnabled)
+                widget.onLongPressUp();
             },
       onLongPressEnd: !hasLongPress
           ? null
           : (_) {
-              if (widget.onLongPressEnd != null && isEnabled) widget.onLongPressEnd(_);
+              if (widget.onLongPressEnd != null && isEnabled)
+                widget.onLongPressEnd(_);
             },
       onVerticalDragDown: !hasVerticalDrag
           ? null
           : (_) {
-              if (widget.onVerticalDragDown != null && isEnabled) widget.onVerticalDragDown(_);
+              if (widget.onVerticalDragDown != null && isEnabled)
+                widget.onVerticalDragDown(_);
             },
       onVerticalDragStart: !hasVerticalDrag
           ? null
           : (_) {
               springDown();
-              if (widget.onVerticalDragStart != null && isEnabled) widget.onVerticalDragStart(_);
+              if (widget.onVerticalDragStart != null && isEnabled)
+                widget.onVerticalDragStart(_);
             },
       onVerticalDragUpdate: !hasVerticalDrag
           ? null
           : (_) {
-              if (widget.onVerticalDragUpdate != null && isEnabled) widget.onVerticalDragUpdate(_);
+              if (widget.onVerticalDragUpdate != null && isEnabled)
+                widget.onVerticalDragUpdate(_);
             },
       onVerticalDragEnd: !hasVerticalDrag
           ? null
           : (_) {
               spring();
-              if (widget.onVerticalDragEnd != null && isEnabled) widget.onVerticalDragEnd(_);
+              if (widget.onVerticalDragEnd != null && isEnabled)
+                widget.onVerticalDragEnd(_);
             },
       onVerticalDragCancel: !hasVerticalDrag
           ? null
           : () {
               springUp();
-              if (widget.onVerticalDragCancel != null && isEnabled) widget.onVerticalDragCancel();
+              if (widget.onVerticalDragCancel != null && isEnabled)
+                widget.onVerticalDragCancel();
             },
       onHorizontalDragDown: !hasHorizontalDrag
           ? null
           : (_) {
-              if (widget.onHorizontalDragDown != null && isEnabled) widget.onHorizontalDragDown(_);
+              if (widget.onHorizontalDragDown != null && isEnabled)
+                widget.onHorizontalDragDown(_);
             },
       onHorizontalDragStart: !hasHorizontalDrag
           ? null
           : (_) {
               springDown();
-              if (widget.onHorizontalDragStart != null && isEnabled) widget.onHorizontalDragStart(_);
+              if (widget.onHorizontalDragStart != null && isEnabled)
+                widget.onHorizontalDragStart(_);
             },
       onHorizontalDragUpdate: !hasHorizontalDrag
           ? null
           : (_) {
-              if (widget.onHorizontalDragUpdate != null && isEnabled) widget.onHorizontalDragUpdate(_);
+              if (widget.onHorizontalDragUpdate != null && isEnabled)
+                widget.onHorizontalDragUpdate(_);
             },
       onHorizontalDragEnd: !hasHorizontalDrag
           ? null
           : (_) {
               spring();
-              if (widget.onHorizontalDragEnd != null && isEnabled) widget.onHorizontalDragEnd(_);
+              if (widget.onHorizontalDragEnd != null && isEnabled)
+                widget.onHorizontalDragEnd(_);
             },
       onHorizontalDragCancel: !hasHorizontalDrag
           ? null
           : () {
               springUp();
-              if (widget.onHorizontalDragCancel != null && isEnabled) widget.onHorizontalDragCancel();
+              if (widget.onHorizontalDragCancel != null && isEnabled)
+                widget.onHorizontalDragCancel();
             },
       onForcePressStart: !hasForcePress
           ? null
           : (_) {
               springDown();
-              if (widget.onForcePressStart != null && isEnabled) widget.onForcePressStart(_);
+              if (widget.onForcePressStart != null && isEnabled)
+                widget.onForcePressStart(_);
             },
       onForcePressPeak: !hasForcePress
           ? null
           : (_) {
-              if (widget.onForcePressPeak != null && isEnabled) widget.onForcePressPeak(_);
+              if (widget.onForcePressPeak != null && isEnabled)
+                widget.onForcePressPeak(_);
             },
       onForcePressUpdate: !hasForcePress
           ? null
           : (_) {
-              if (widget.onForcePressUpdate != null && isEnabled) widget.onForcePressUpdate(_);
+              if (widget.onForcePressUpdate != null && isEnabled)
+                widget.onForcePressUpdate(_);
             },
       onForcePressEnd: !hasForcePress
           ? null
           : (_) {
               spring();
-              if (widget.onForcePressEnd != null && isEnabled) widget.onForcePressEnd(_);
+              if (widget.onForcePressEnd != null && isEnabled)
+                widget.onForcePressEnd(_);
             },
       onPanDown: !hasPan
           ? null
@@ -448,7 +564,8 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
       onPanUpdate: !hasPan
           ? null
           : (_) {
-              if (widget.onPanUpdate != null && isEnabled) widget.onPanUpdate(_);
+              if (widget.onPanUpdate != null && isEnabled)
+                widget.onPanUpdate(_);
             },
       onPanEnd: !hasPan
           ? null
@@ -466,12 +583,14 @@ class SpringButtonState extends State<SpringButton> with SingleTickerProviderSta
           ? null
           : (_) {
               springDown();
-              if (widget.onScaleStart != null && isEnabled) widget.onScaleStart(_);
+              if (widget.onScaleStart != null && isEnabled)
+                widget.onScaleStart(_);
             },
       onScaleUpdate: !hasScale
           ? null
           : (_) {
-              if (widget.onScaleUpdate != null && isEnabled) widget.onScaleUpdate(_);
+              if (widget.onScaleUpdate != null && isEnabled)
+                widget.onScaleUpdate(_);
             },
       onScaleEnd: !hasScale
           ? null
