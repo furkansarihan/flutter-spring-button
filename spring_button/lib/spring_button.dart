@@ -434,8 +434,7 @@ class SpringButtonState extends State<SpringButton>
               springDown();
               if (widget.onLongPressStart != null && isEnabled)
                 widget.onLongPressStart(_);
-              if (widget.releaseOnLongPress) {
-                print('releaseonLongPress');
+              if (widget.releaseOnLongPress ?? false) {
                 spring();
               }
             },
